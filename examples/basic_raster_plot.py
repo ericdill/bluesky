@@ -2,11 +2,14 @@ import numpy as np
 import bluesky.callbacks
 import matplotlib.pyplot as plt
 from cycler import cycler
+import time as ttime
+from bluesky import qt_kicker
+
+
 xct = 10
 yct = 15
 ict = xct * yct
 cb = None
-from bluesky import qt_kicker
 
 def setup():
     global cb
@@ -23,3 +26,6 @@ def run():
         ev = {'data': d, 'seq_num': j + 1}
         cb('event', ev)
         plt.pause(.1)
+        # ttime.sleep(0.1)
+        qt_kicker.qApp.processEvents()
+

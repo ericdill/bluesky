@@ -566,7 +566,8 @@ class FancyLiveRaster(CallbackBase):
     def start(self, doc):
         # ideally we would have info re: raster image shape here, but i'm not
         # sure that info is currently accessible from the RunStart document
-        pass
+        self._im_data = np.ones(self.raster_shape) * np.nan
+        self.widget._messenger._view.update_image(self._im_data)
 
     def event(self, doc):
         seq_num = doc['seq_num'] - 1
