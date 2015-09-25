@@ -481,7 +481,7 @@ class LiveRaster(CallbackBase):
 
     Parameters
     ----------
-    raster_shap : tuple
+    raster_shape : tuple
         The (row, col) shape of the raster
 
     I : str
@@ -492,6 +492,7 @@ class LiveRaster(CallbackBase):
 
     cmap : str or colormap, optional
        The color map to use
+       Defaults to viridis
     """
     def __init__(self, raster_shape, I, *,
                  clim=None, cmap='viridis'):
@@ -527,3 +528,48 @@ class LiveRaster(CallbackBase):
         self._Idata[pos] = doc['data'][self.I]
 
         self.im.set_array(self._Idata)
+
+
+class FancyLiveRaster(CallbackBase):
+    """Callback that spawns a cross section widget with buttons and stuff
+
+    Parameters
+    ----------
+    raster_shape: tuple
+        The (row, col) shape of the raster
+    I : str
+        The datakey to use for the color of the markers. Should be a key in
+        descriptor.datakeys.keys() or event.data.keys()
+    clim : tuple, optional
+        Initial settings for the color limits of the rendered image
+    cmap : str or colormap, optional
+        Any argument that matplotlib will understand as a colormap
+        Defaults to viridis
+    """
+    def __init__(self, raster_shape, I, *,
+                 clim=None, cmap='viridis'):
+        # yeah, i know it is way too long of a name...
+        from xray_vision.qt_widgets import CrossSectionMainWindow
+        from matplotlib.backends.backend_qt5 import _create_qApp
+        _create_qApp()
+        # stash the input info
+        self.clim = clim
+        self.cmap = cmap
+        self.raster_shape = raster_shape
+        self.I = I
+        self.widget = CrossSectionMainWindow()
+        # init the widget with a random image
+        self.widget._messenger._view.update_image(np.random.random(raster_shape))
+        self.widget._messenger._view.update_cmap(self.cmap)
+        self._im_data = np.ones(self.raster_shape) * np.nan
+
+    def start(self, doc):
+        # ideally we would have info re: raster image shape here, but i'm not
+        # sure that info is currently accessible from the RunStart document
+        pass
+
+    def event(self, doc):
+        seq_num = doc['seq_num'] - 1
+        pos = np.unravel_index(seq_num, self.raster_shape)
+        self._im_data[pos] = doc['data'][self.I]
+        self.widget._messenger._view.update_image(self._im_data)
