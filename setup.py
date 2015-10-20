@@ -19,8 +19,9 @@ setup(
     url="https://github.com/danielballan/bluesky",
     packages=['bluesky', 'bluesky.tests', 'bluesky.testing'],
     package_data={'bluesky': ['schema/*.json']},
-    install_requires=['jsonschema', 'traitlets', 'prettytable', 'cycler',
-                      'history', 'numpy', 'matplotlib', 'super_state_machine'],
+    include_package_data=True,
+    # install_requires=['jsonschema', 'traitlets', 'prettytable', 'cycler',
+    #                   'history', 'numpy', 'matplotlib', 'super_state_machine'],
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Programming Language :: Python :: 3.4",
