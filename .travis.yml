@@ -1,6 +1,15 @@
 language: python
 sudo: false
-
+env:
+  global:
+    - BUILD_DOCS: false
+    -   secure: "fz2qITfux6fVyqhX6k8L7w6kPrxaMOCuIriGS1aBg4pAyi0bdU8XkP/KUevq9Ep5/nbf2FCSd4cgdPEYAVC97NuRpHjux6kjWlMGYVnjzA3F8GqMAWmay00uz3zOXXxEqURekOXANjGOXVOzfZUW61OWadGt/y5ThRmRb2l/CH/4viQ9GaDrdwa/0BTQrEyxvW3R1SdI9vcczf42XDmcHeJdnQfSJCS1pjIdtbTpXvk45voOuUBsZRzhMEL2+mg6U6CAi8xk+VnncWOxW+jMF316Gl5uG9nLHmZmMC0pL2OoWtgvFlTheca3LOPLAk/1m4+TYfQ4/iEgup0uzGd2JhwZ6XjxC4dzQfomSaizep97Fjp+zb0gIGvSIQXvA5xHgvbsf6qBKLJ1z8w689XaQlfUx1Lmrrxmgj/mEggMvYnvpzPmgLfkedXVgy+n3km9qsUQ/4E1sAWYWz5Z4Xssyyp+mQX5jAdrpcOOKIYVh7Vpn5UtA7K94g1CMVIoygPkE67+Y3B+NcMXaiN19k6o1Sxe1mgsIkiz8+174u3a3bGarxkAgT+niasCy4i9lI3sZ5IvGiYc84j8i2SjUbrNNWcVbDMFR9GRnixpVJxu1lTP0MJnnK5pIp6PUtFGyNgtDPKRRGjnJAFvXZ40CTfR+c4F0MoXpJ2i1SPnRQhVFZ4="
+matrix:
+  include:
+    - BUILD_DOCS: true
+      python: 3.5
+      GH_REF: github.com/ericdill/ericdill.github.io
+      BUILD_DOCS_BRANCH: 'build-docs'
 services:
   - mongodb
 addons:
@@ -17,22 +26,14 @@ python:
 before_install:
   - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1280x1024x16"
   - "export DISPLAY=:99.0"
-  - if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then wget http://repo.continuum.io/miniconda/Miniconda-3.5.5-Linux-x86_64.sh -O miniconda.sh; else wget http://repo.continuum.io/miniconda/Miniconda3-3.5.5-Linux-x86_64.sh -O miniconda.sh; fi
-  - chmod +x miniconda.sh
-  - ./miniconda.sh -b -p /home/travis/mc
-  - export PATH=/home/travis/mc/bin:$PATH
-  - conda config --set show_channel_urls True
-  - conda config --set always_yes True
-  - export MDS_HOST=localhost
-  - export MDS_DATABASE=test
-  - export MDS_TIMEZONE=US/Eastern
-  - mkdir -p /home/travis/.config/metadatastore
-  - 'echo ''port: 27017'' > /home/travis/.config/metadatastore/connection.yml'
-  - export FS_HOST=localhost
-  - export FS_DATABASE=test
-  - mkdir -p /home/travis/.config/filestore
-  - 'echo ''port: 27017'' > /home/travis/.config/filestore/connection.yml'
-
+  # clone conda install/build/upload helper scripts and make them executable
+  - git clone https://github.com/NSLS-II/nsls2-ci ~/scripts
+  - pushd ~/scripts
+  - chmod +x *.sh
+  - . install-miniconda.sh
+  - . init-metadatastore.sh
+  - . init-filestore.sh
+  - popd
 
 install:
   - export GIT_FULL_HASH=`git rev-parse HEAD`

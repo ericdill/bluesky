@@ -39,6 +39,8 @@ test:
     - 'bluesky.examples'
     - 'bluesky.callbacks'
     - 'bluesky.register_mds'
+  script:
+    - pytest bluesky
 
 about:
   home: https://github.com/NSLS-II/bluesky
