@@ -37,26 +37,25 @@ before_install:
 
 install:
   - export GIT_FULL_HASH=`git rev-parse HEAD`
-  - conda install "conda<4"
   - conda create -n testenv nose python=$TRAVIS_PYTHON_VERSION scipy requests matplotlib jsonschema traitlets pytest coverage
   - source activate testenv
-  - 'pip install https://github.com/NSLS-II/event-model/zipball/master#egg=event_model'
-  - conda install metadatastore databroker ophyd historydict boltons doct toolz tifffile pymongo pcaspy pyepics readline super_state_machine cycler xray-vision lmfit jinja2 -c lightsource2 -c conda-forge -c soft-matter
-  - conda remove metadatastore databroker filestore --yes
-  - 'pip install https://github.com/NSLS-II/databroker/zipball/master#egg=databroker'
-  - 'pip install https://github.com/NSLS-II/filestore/zipball/master#egg=filestore'
-  - 'pip install https://github.com/NSLS-II/metadatastore/zipball/master#egg=metadatastore'
+  - conda install metadatastore databroker ophyd historydict boltons doct toolz tifffile pymongo pcaspy pyepics readline super_state_machine cycler xray-vision lmfit jinja2 -c soft-matter
+  - conda remove metadatastore databroker filestore --yes --force
   - pip install codecov
   - python setup.py install
   # Need to clean the python build directory (and other cruft) or pytest is
   # going to find the build directory and get confused why there are two sets
   # of every test file
-  - python -c "from filestore import utils, conf; utils.install_sentinels(conf.connection_config, 1)"
   - git clean -xfd
+  - python -c "from filestore import utils, conf; utils.install_sentinels(conf.connection_config, 1)"
 
 script:
-  - coverage run run_tests.py
-  - coverage report -m
+  - if [[ BUILD_DOCS == 'true' ]]; then
+        . ~/scripts/do-the-docs.sh;
+    else
+        coverage run run_tests.py;
+        coverage report -m;
+    fi;
 
 after_success:
   - codecov
